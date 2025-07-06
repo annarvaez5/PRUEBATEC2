@@ -147,11 +147,10 @@ def inicializar_equipos():
     if Equipo.query.count() == 0:
         print("Cargando equipos iniciales...")
         equipos = [
-            'Atlético Nacionalpao', 'Millonarios', 'América de Cali', 'Deportivo Cali',
-            'Junior de Barranquilla', 'Independiente Santa Fe', 'Once Caldas', 'Deportes Tolima',
-            'Real Madrid', 'FC Barcelona', 'Atlético de Madrid', 'Sevilla FC',
-            'Manchester United', 'Liverpool FC', 'Chelsea FC', 'Arsenal FC',
-            'Bayern München', 'Borussia Dortmund', 'AC Milan', 'Inter Milan','EQUIPO PAOLA']
+            'HOSVITAL LIDERES', 'HOSVITAL KAMS', 'HOSVITAL MET', 'KACTUS LIDERES',
+            'KACTUS KAMS', 'KACTUS MET', 'SEVEN LIDERES', 'SEVEN KAMS',
+            'SEVEN MET', 'EQUIPO SAAS', 'EQUIPO TI', 'ADMINISTRATIVO',
+        ]
         for nombre in equipos:
             db.session.add(Equipo(nombre=nombre)) #type: ignore
         db.session.commit()
