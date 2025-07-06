@@ -1,4 +1,4 @@
-# ⚽ LIGA DW - Prueba Dw
+# LIGA DW - Prueba Dw
 
 # Instrucciones de uso:
 # Roles:
@@ -23,7 +23,7 @@ Al finalizar el partido podrán ingresar con el código y confirmar quien acert�
 
 
 
-## 🚀 Características
+## Características
 
 * **Panel de Administrador:** Carga de partidos del día y actualización de resultados finales.
 * **Creación de Sesiones:** Los usuarios crean una "sala" de apuestas para un partido específico.
