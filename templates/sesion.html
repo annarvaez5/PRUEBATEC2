@@ -1,0 +1,137 @@
+{% extends "layout.html" %}
+
+{% block title %}Sesión: {{ sesion.nombre_sesion }}{% endblock %}
+
+{% block content %}
+<div class="text-center mb-4">
+    <h2>{{ sesion.nombre_sesion }}</h2>
+    <h4 class="text-muted">{{ sesion.partido.equipo_local.nombre }} vs {{ sesion.partido.equipo_visitante.nombre }}</h4>
+    <p>Comparte este código con tus amigos: 
+        <span class="badge bg-secondary fs-5">{{ sesion.codigo_acceso }}</span>
+    </p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header fw-bold">Apuestas Registradas</div>
+            <div class="card-body">
+                <ul class="list-group" id="lista-apuestas">
+                    {% for apuesta in sesion.apuestas %}
+                        <li class="list-group-item">
+                            {{ apuesta.nombre_usuario }}: <strong>{{ apuesta.prediccion_local }} - {{ apuesta.prediccion_visitante }}</strong>
+                        </li>
+                    {% else %}
+                        <li class="list-group-item text-center" id="sin-apuestas">Aún no hay apuestas. ¡Sé el primero!</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        {% if not sesion.partido.finalizado %}
+        <div id="area-apuesta">
+            <div class="card">
+                <div class="card-header fw-bold">¡Haz tu predicción!</div>
+                <div class="card-body">
+                    <form id="form-apuesta">
+                        <div class="mb-3">
+                            <label for="nombre_usuario" class="form-label">Tu Nombre</label>
+                            <input type="text" id="nombre_usuario" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tu Predicción</label>
+                            <div class="input-group">
+                                <input type="number" id="prediccion_local" class="form-control" placeholder="{{ sesion.partido.equipo_local.nombre }}" min="0" required>
+                                <span class="input-group-text">-</span>
+                                <input type="number" id="prediccion_visitante" class="form-control" placeholder="{{ sesion.partido.equipo_visitante.nombre }}" min="0" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Registrar mi Apuesta</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div id="ganadores" class="mt-4">
+            {% if ganadores is not none %}
+                <h3 class="text-center">¡Partido Finalizado!</h3>
+                {% if ganadores %}
+                    <div class="alert alert-success fs-4 text-center">🏆 Ganador(es): {{ ganadores|join(', ') }}</div>
+                {% else %}
+                    <div class="alert alert-warning text-center">No hubo acertantes.</div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Conexión con Socket.IO
+    const socket = io();
+    const roomCode = "{{ sesion.codigo_acceso }}";
+
+    // 1. Unirse a la "sala" de la sesión al conectar
+    socket.on('connect', () => {
+        socket.emit('join', { room: roomCode });
+    });
+
+    // 2. Manejar el envío del formulario de apuesta
+    const formApuesta = document.getElementById('form-apuesta');
+    formApuesta.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nombre = document.getElementById('nombre_usuario').value;
+        const predLocal = document.getElementById('prediccion_local').value;
+        const predVisitante = document.getElementById('prediccion_visitante').value;
+
+        if (nombre.trim() && predLocal.trim() !== '' && predVisitante.trim() !== '') {
+            socket.emit('registrar_apuesta', {
+                room: roomCode,
+                nombre: nombre,
+                prediccion_local: predLocal,
+                prediccion_visitante: predVisitante
+            });
+            // Opcional: Limpiar solo las predicciones para que el usuario no tenga que reescribir su nombre
+            document.getElementById('prediccion_local').value = '';
+            document.getElementById('prediccion_visitante').value = '';
+        }
+    });
+
+    // 3. Escuchar por actualizaciones de la lista de apuestas
+    socket.on('actualizar_apuestas', (data) => {
+        const lista = document.getElementById('lista-apuestas');
+        lista.innerHTML = ''; // Limpiar la lista actual
+        if (data.apuestas.length === 0) {
+             lista.innerHTML = '<li class="list-group-item text-center">Aún no hay apuestas.</li>';
+        } else {
+            data.apuestas.forEach(apuesta => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.innerHTML = `${apuesta.nombre}: <strong>${apuesta.prediccion}</strong>`;
+                lista.appendChild(li);
+            });
+        }
+    });
+
+    // 4. Escuchar por el evento de finalización del partido
+    socket.on('partido_finalizado', (data) => {
+        const divGanadores = document.getElementById('ganadores');
+        let resultadoHtml = `<h3 class="text-center">¡Partido Finalizado!</h3>`;
+        if (data.ganadores && data.ganadores.length > 0) {
+            resultadoHtml += `<div class="alert alert-success fs-4 text-center">🏆 Ganador(es): ${data.ganadores.join(', ')}</div>`;
+        } else {
+            resultadoHtml += `<div class="alert alert-warning text-center">No hubo acertantes.</div>`;
+        }
+        divGanadores.innerHTML = resultadoHtml;
+        
+        // Ocultar el formulario de apuestas
+        document.getElementById('area-apuesta').style.display = 'none';
+    });
+});
+</script>
+{% endblock %}

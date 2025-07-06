@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}Inicio - LIGA DW{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="display-5">Bienvenido a la LIGA DW</h1>
+    <p class="lead">Crea una sesión, comparte el código y apuesta con tus amigos.</p>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header fw-bold">
+                Crear Nueva Sesión de Apuestas
+            </div>
+            <div class="card-body">
+                {% if partidos %}
+                <form action="{{ url_for('crear_sesion') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="nombre_sesion" class="form-label">Nombre para tu sesión (Ej: "Oficina", "Amigos U")</label>
+                        <input type="text" id="nombre_sesion" name="nombre_sesion" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="partido_id" class="form-label">Elige el partido del día</label>
+                        <select name="partido_id" id="partido_id" class="form-select" required>
+                            <option value="" disabled selected>-- Partidos disponibles --</option>
+                            {% for partido in partidos %}
+                            <option value="{{ partido.id }}">
+                                {{ partido.equipo_local.nombre }} vs {{ partido.equipo_visitante.nombre }} ({{ partido.fecha_hora.strftime('%H:%M') }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Crear Sesión y Obtener Código</button>
+                </form>
+                {% else %}
+                <div class="alert alert-info text-center" role="alert">
+                    No hay partidos disponibles para apostar en este momento. Vuelve más tarde.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
