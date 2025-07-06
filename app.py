@@ -147,7 +147,7 @@ def inicializar_equipos():
     if Equipo.query.count() == 0:
         print("Cargando equipos iniciales...")
         equipos = [
-            'Atlético Nacional', 'Millonarios', 'América de Cali', 'Deportivo Cali',
+            'Atlético Nacionalpao', 'Millonarios', 'América de Cali', 'Deportivo Cali',
             'Junior de Barranquilla', 'Independiente Santa Fe', 'Once Caldas', 'Deportes Tolima',
             'Real Madrid', 'FC Barcelona', 'Atlético de Madrid', 'Sevilla FC',
             'Manchester United', 'Liverpool FC', 'Chelsea FC', 'Arsenal FC',
